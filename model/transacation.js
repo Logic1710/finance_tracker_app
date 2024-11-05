@@ -2,6 +2,7 @@ class Transaction {
   constructor(
     id,
     uid,
+    u_uid,
     name,
     type,
     category,
@@ -12,6 +13,7 @@ class Transaction {
   ) {
     this.id = id;
     this.uid = uid;
+    this.u_uid = u_uid;
     this.name = name;
     this.type = type;
     this.category = category;
