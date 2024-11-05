@@ -38,12 +38,13 @@ const router = express.Router();
 
 //add User
 router.post("/", async (req, res) => {
+  const { fullname, username, email, newpassword, confpassword } = req.body;
   if (
-    req.body.fullname === undefined ||
-    req.body.username === undefined ||
-    req.body.email === undefined ||
-    req.body.password === undefined ||
-    req.body.confpassword === undefined
+    fullname === undefined ||
+    username === undefined ||
+    email === undefined ||
+    newpassword === undefined ||
+    confpassword === undefined
   ) {
     res.status(400).send({
       success: false,
@@ -52,7 +53,7 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  if (req.body.password !== req.body.confpassword) {
+  if (newpassword !== confpassword) {
     res.status(400).send({
       success: false,
       error: "Password does not match",
@@ -60,7 +61,7 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  if (!validateInputFullname(req.body.fullname)) {
+  if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
       error: "Fullname can only contain alphabets and spaces",
@@ -68,7 +69,7 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  if (!validateInputUsername(req.body.username)) {
+  if (!validateInputUsername(username)) {
     res.status(400).send({
       success: false,
       error: "Username can only contain alphanumeric characters",
@@ -76,7 +77,7 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  if (!validateInputPassword(req.body.password)) {
+  if (!validateInputPassword(password)) {
     res.status(400).send({
       success: false,
       error:
@@ -85,14 +86,14 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  if (!validateInputEmail(req.body.email)) {
+  if (!validateInputEmail(email)) {
     res.status(400).send({
       success: false,
-      error: "Email is not valid",
+      error: EMAIL_NOT_VALID,
     });
     return;
   }
-  const password = req.body.password;
+  const password = newpassword;
   const salt = makeId(6);
   const saltPlusPass = salt + password;
   const saltedPassword = crypto.SHA256(saltPlusPass).toString();
@@ -147,11 +148,12 @@ router.get("/", authenticateToken, async (req, res) => {
 //edit user
 router.put("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
+  const { fullname, username, email, balance } = req.body;
   if (
-    req.body.fullname === undefined ||
-    req.body.username === undefined ||
-    req.body.email === undefined ||
-    req.body.balance === undefined
+    fullname === undefined ||
+    username === undefined ||
+    email === undefined ||
+    balance === undefined
   ) {
     res.status(400).send({
       success: false,
@@ -160,37 +162,28 @@ router.put("/", authenticateToken, async (req, res) => {
     return;
   }
 
-  if (!validateInputFullname(req.body.fullname)) {
+  if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
       error: "Fullname can only contain alphabets and spaces",
     });
   }
 
-  if (validateInputUsername(req.body.username)) {
+  if (validateInputUsername(username)) {
     res.status(400).send({
       success: false,
       error: "Username can only contain alphanumeric characters",
     });
   }
 
-  if (validateInputEmail(req.body.email)) {
+  if (validateInputEmail(email)) {
     res.status(400).send({
       success: false,
       error: "Email is not valid",
     });
     return;
   }
-
-  console.log(req.user);
-  const user = new User(
-    null,
-    cred.uid,
-    req.body.fullname,
-    req.body.username,
-    req.body.email,
-    req.body.balance,
-  );
+  const user = new User(null, cred.uid, fullname, username, email, balance);
   delete user.id;
 
   editUser(user)
@@ -230,8 +223,15 @@ router.delete("/", authenticateToken, async (req, res) => {
 
 //login
 router.post("/login", async (req, res) => {
-  if (validateInputEmail(req.body.emailorusername)) {
-    loginWithEmail(req.body.emailorusername, req.body.password)
+  const { emailorusername, password } = req.body;
+  if (emailorusername === undefined || password === undefined) {
+    res.status(400).send({
+      success: false,
+      error: INCOMPLETE_BODY,
+    });
+  }
+  if (validateInputEmail(emailorusername)) {
+    loginWithEmail(emailorusername, password)
       .then((result) => {
         const payload = {
           uid: result.uid,
@@ -261,7 +261,7 @@ router.post("/login", async (req, res) => {
         }
       });
   } else {
-    loginWithUsername(req.body.emailorusername, req.body.password)
+    loginWithUsername(emailorusername, password)
       .then((result) => {
         const payload = {
           uid: result.uid,
@@ -296,10 +296,11 @@ router.post("/login", async (req, res) => {
 //change password
 router.put("/changepassword", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
+  const { oldpassword, newpassword, confpassword } = req.body;
   if (
-    req.body.oldpassword === undefined ||
-    req.body.newpassword === undefined ||
-    req.body.confpassword === undefined
+    oldpassword === undefined ||
+    newpassword === undefined ||
+    confpassword === undefined
   ) {
     res.status(400).send({
       success: false,
@@ -308,7 +309,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     return;
   }
 
-  if (!validateInputPassword(req.body.newpassword)) {
+  if (!validateInputPassword(newpassword)) {
     res.status(400).send({
       success: false,
       error:
@@ -317,7 +318,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     return;
   }
 
-  if (req.body.newpassword !== req.body.confpassword) {
+  if (newpassword !== confpassword) {
     res.status(400).send({
       success: false,
       error: "PASSWORD_MISMATCH",
@@ -325,7 +326,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     return;
   }
 
-  changePwd(cred.uid, req.body.oldpassword, req.body.newpassword)
+  changePwd(cred.uid, oldpassword, newpassword)
     .then((result) => {
       res.status(200).send({
         success: true,
@@ -358,21 +359,24 @@ router.post("/logout", authenticateToken, async (req, res) => {
 
 //forgot password
 router.post("/forgot-password", async (req, res) => {
-  if (req.body.email === undefined) {
+  const { email } = req.body;
+
+  if (email === undefined) {
     res.status(400).send({
       success: false,
       error: INCOMPLETE_BODY,
     });
     return;
   }
-  if (!validateInputEmail(req.body.email)) {
+
+  if (!validateInputEmail(email)) {
     res.status(400).send({
       success: false,
       error: EMAIL_NOT_VALID,
     });
     return;
   }
-  forgotPassword(req.body.email)
+  forgotPassword(email)
     .then((message) => {
       res.status(200).send({
         success: true,
@@ -390,7 +394,14 @@ router.post("/forgot-password", async (req, res) => {
 
 router.post("/reset-password/:token", (req, res) => {
   const { token } = req.params;
-  const newpassword = req.body.newpassword;
+  const { newpassword } = req.body;
+
+  if (newpassword === undefined) {
+    res.status(400).send({
+      success: false,
+      error: INCOMPLETE_BODY,
+    });
+  }
 
   resetPassword(token, newpassword)
     .then((message) => {
