@@ -21,7 +21,11 @@ const crypto = require("crypto-js");
 
 //Error messages
 const { INCOMPLETE_BODY } = require("../constants/error_messages");
+
+//routes
 const { addTransaction } = require("../dao/transaction/add");
+const { editUser } = require("../dao/user/edit");
+const { getAllUsers } = require("../dao/user/get_all");
 
 const router = express.Router();
 
@@ -53,19 +57,35 @@ router.post("/", authenticateToken, async (req, res) => {
   );
   transaction.is_deleted = 0;
 
-  addTransaction(transaction)
-    .then((result) => {
-      res.status(200).send({
-        success: true,
-        data: result,
-      });
-    })
-    .catch((err) => {
-      res.status(500).send({
-        success: false,
-        error: err,
-      });
+  try {
+    // Fetch the user to get the current balance
+    const user = await getAllUsers(cred.uid);
+
+    console.log(user.users[0].balance);
+
+    // Update the user's balance based on the transaction type
+    if (type === "income") {
+      user.users[0].balance += parseFloat(amount);
+    } else if (type === "expense") {
+      user.users[0].balance -= parseFloat(amount);
+    } else {
+      throw new Error("INVALID_TRANSACTION_TYPE");
+    }
+
+    await editUser(user.users[0]);
+
+    const result = await addTransaction(transaction);
+
+    res.status(200).send({
+      success: true,
+      data: result,
     });
+  } catch (err) {
+    res.status(500).send({
+      success: false,
+      error: err.message,
+    });
+  }
 });
 
 module.exports = router;

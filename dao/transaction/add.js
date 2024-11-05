@@ -28,23 +28,7 @@ module.exports.addTransaction = (transaction) => {
         } else {
           transaction.id = res.insertId;
           delete transaction.id;
-
-          // Update user balance based on transaction type
-          const balanceUpdateQuery =
-            transaction.type === "income"
-              ? "UPDATE `user` SET `u_balance` = `u_balance` + ? WHERE `u_uid` = ?"
-              : "UPDATE `user` SET `u_balance` = `u_balance` - ? WHERE `u_uid` = ?";
-          conn.query(
-            balanceUpdateQuery,
-            [transaction.amount, transaction.u_uid],
-            (balanceErr) => {
-              if (balanceErr) {
-                reject(balanceErr);
-              } else {
-                resolve(transaction);
-              }
-            },
-          );
+          resolve(transaction);
         }
       },
     );
