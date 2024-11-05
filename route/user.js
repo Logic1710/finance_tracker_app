@@ -26,13 +26,14 @@ const { editUser } = require("../dao/user/edit");
 const { deleteUser } = require("../dao/user/delete");
 const { loginWithUsername, loginWithEmail } = require("../dao/user/login");
 const { changePwd } = require("../dao/user/changePassword");
+const { forgotPassword } = require("../dao/user/forgotPassword");
+const { resetPassword } = require("../dao/user/resetPassword");
+
 const {
   AUTHENTICATION_FAILED,
   INCOMPLETE_BODY,
   EMAIL_NOT_VALID,
 } = require("../constants/error_messages");
-const { forgotPassword } = require("../dao/user/forgotPassword");
-const { resetPassword } = require("../dao/user/resetPassword");
 
 const router = express.Router();
 
