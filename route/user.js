@@ -25,8 +25,14 @@ const { getAllUsers } = require("../dao/user/get_all");
 const { editUser } = require("../dao/user/edit");
 const { deleteUser } = require("../dao/user/delete");
 const { loginWithUsername, loginWithEmail } = require("../dao/user/login");
-const { changePwd } = require("../dao/user/changepassword");
-const { AUTHENTICATION_FAILED } = require("../constants/error_messages");
+const { changePwd } = require("../dao/user/changePassword");
+const {
+  AUTHENTICATION_FAILED,
+  INCOMPLETE_BODY,
+  EMAIL_NOT_VALID,
+} = require("../constants/error_messages");
+const { forgotPassword } = require("../dao/user/forgotPassword");
+const { resetPassword } = require("../dao/user/resetPassword");
 
 const router = express.Router();
 
@@ -348,6 +354,51 @@ router.post("/logout", authenticateToken, async (req, res) => {
     success: true,
     message: "Logged out",
   });
+});
+
+//forgot password
+router.post("/forgot-password", async (req, res) => {
+  if (req.body.email === undefined) {
+    res.status(400).send({
+      success: false,
+      error: INCOMPLETE_BODY,
+    });
+    return;
+  }
+  if (!validateInputEmail(req.body.email)) {
+    res.status(400).send({
+      success: false,
+      error: EMAIL_NOT_VALID,
+    });
+    return;
+  }
+  forgotPassword(req.body.email)
+    .then((message) => {
+      res.status(200).send({
+        success: true,
+        message: message,
+      });
+    })
+    .catch((e) => {
+      console.error(e);
+      res.status(500).send({
+        success: false,
+        error: e,
+      });
+    });
+});
+
+router.post("/reset-password/:token", (req, res) => {
+  const { token } = req.params;
+  const newpassword = req.body.newpassword;
+
+  resetPassword(token, newpassword)
+    .then((message) => {
+      res.status(200).send(message);
+    })
+    .catch((error) => {
+      res.status(400).send(error);
+    });
 });
 
 module.exports = router;

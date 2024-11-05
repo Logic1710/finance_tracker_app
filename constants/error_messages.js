@@ -5,3 +5,6 @@ module.exports.WRONG_CREDENTIAL = "WRONG_CREDENTIAL";
 module.exports.INVALID_INPUT = "INVALID INPUT";
 module.exports.NOT_FOUND = "NOT FOUND";
 module.exports.SERVER_ERROR = "SERVER ERROR";
+module.exports.EMAIL_NOT_FOUND = "EMAIL NOT FOUND";
+module.exports.EMAIL_NOT_VALID = "EMAIL NOT VALID";
+module.exports.INVALID_TOKEN = "INVALID TOKEN";

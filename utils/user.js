@@ -25,7 +25,7 @@ const { getAllUsers } = require("../dao/user/get_all");
 const { editUser } = require("../dao/user/edit");
 const { deleteUser } = require("../dao/user/delete");
 const { loginWithUsername, loginWithEmail } = require("../dao/user/login");
-const { changePwd } = require("../dao/user/changepassword");
+const { changePwd } = require("../dao/user/changePassword");
 
 const router = express.Router();
 
