@@ -212,4 +212,76 @@ router.put("/", authenticateToken, async (req, res) => {
   }
 });
 
+// delete transaction
+router.delete("/", authenticateToken, async (req, res) => {
+  const cred = decoded_access(req.headers["authorization"]);
+  const { q } = req.query;
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_uid: cred.uid,
+        u_is_deleted: false,
+      },
+    });
+    if (!user) {
+      res.status(404).send({
+        success: false,
+        error: USER_NOT_FOUND,
+      });
+      return;
+    }
+
+    const transaction = await prisma.transaction.findFirst({
+      where: {
+        t_uid: q,
+        t_is_deleted: false,
+      },
+    });
+
+    if (!transaction) {
+      res.status(404).send({
+        success: false,
+        error: TRANSACTION_NOT_FOUND,
+      });
+      return;
+    }
+
+    if (transaction.t_type === "income") {
+      user.u_balance -= parseFloat(transaction.t_amount);
+    } else if (transaction.t_type === "expense") {
+      user.u_balance += parseFloat(transaction.t_amount);
+    } else {
+      return new Error(INVALID_TRANSACTION_TYPE);
+    }
+
+    await prisma.user.update({
+      where: {
+        u_uid: cred.uid,
+      },
+      data: {
+        u_balance: user.u_balance,
+      },
+    });
+
+    const result = await prisma.transaction.update({
+      where: {
+        t_uid: q,
+      },
+      data: {
+        t_is_deleted: true,
+      },
+    });
+
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    res.status(500).send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
 module.exports = router;
