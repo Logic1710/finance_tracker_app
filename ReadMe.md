@@ -20,7 +20,7 @@ Finance Tracker App is a web application that helps users manage their finances 
 
 1. Clone the repository:
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/Logic1710/finance_tracker_app.git
    cd finance-tracker-app
     ```
 2. Install the dependencies:
