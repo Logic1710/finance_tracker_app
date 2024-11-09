@@ -22,7 +22,15 @@ const {
   AUTHENTICATION_FAILED,
   INCOMPLETE_BODY,
   EMAIL_NOT_VALID,
-} = require("../constants/error_messages");
+  ERROR_OCCURED,
+  PASSWORD_RESET_SUCCESSFULLY,
+  WRONG_CREDENTIAL,
+  LOGGED_OUT,
+  FULLNAME_NOT_VALID,
+  USERNAME_NOT_VALID,
+  PASSWORD_NOT_VALID,
+  PASSWORD_NOT_MATCH,
+} = require("../constants/messages");
 
 const router = express.Router();
 
@@ -32,7 +40,7 @@ router.post("/", async (req, res) => {
   if (!fullname || !username || !email || !newpassword || !confpassword) {
     res.status(400).send({
       success: false,
-      error: "Incomplete body",
+      error: INCOMPLETE_BODY,
     });
     return;
   }
@@ -40,7 +48,7 @@ router.post("/", async (req, res) => {
   if (newpassword !== confpassword) {
     res.status(400).send({
       success: false,
-      error: "Password does not match",
+      error: PASSWORD_NOT_MATCH,
     });
     return;
   }
@@ -48,7 +56,7 @@ router.post("/", async (req, res) => {
   if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
-      error: "Fullname can only contain alphabets and spaces",
+      error: FULLNAME_NOT_VALID,
     });
     return;
   }
@@ -56,7 +64,7 @@ router.post("/", async (req, res) => {
   if (!validateInputUsername(username)) {
     res.status(400).send({
       success: false,
-      error: "Username can only contain alphanumeric characters",
+      error: USERNAME_NOT_VALID,
     });
     return;
   }
@@ -64,8 +72,7 @@ router.post("/", async (req, res) => {
   if (!validateInputPassword(newpassword)) {
     res.status(400).send({
       success: false,
-      error:
-        "Password must be at least 8 characters long, contain at least one uppercase letter and one special character",
+      error: PASSWORD_NOT_VALID,
     });
     return;
   }
@@ -143,7 +150,7 @@ router.put("/", authenticateToken, async (req, res) => {
   if (!fullname || !username || !email || balance === undefined) {
     res.status(400).send({
       success: false,
-      error: "INCOMPLETE_BODY",
+      error: INCOMPLETE_BODY,
     });
     return;
   }
@@ -151,7 +158,7 @@ router.put("/", authenticateToken, async (req, res) => {
   if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
-      error: "Fullname can only contain alphabets and spaces",
+      error: FULLNAME_NOT_VALID,
     });
     return;
   }
@@ -159,7 +166,7 @@ router.put("/", authenticateToken, async (req, res) => {
   if (!validateInputUsername(username)) {
     res.status(400).send({
       success: false,
-      error: "Username can only contain alphanumeric characters",
+      error: USERNAME_NOT_VALID,
     });
     return;
   }
@@ -167,7 +174,7 @@ router.put("/", authenticateToken, async (req, res) => {
   if (!validateInputEmail(email)) {
     res.status(400).send({
       success: false,
-      error: "Email is not valid",
+      error: EMAIL_NOT_VALID,
     });
     return;
   }
@@ -327,14 +334,14 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     });
 
     if (!user) {
-      throw AUTHENTICATION_FAILED;
+      return AUTHENTICATION_FAILED;
     }
 
     const saltedOldPass = user.u_salt + oldpassword;
     const oldPassHash = crypto.SHA256(saltedOldPass).toString();
 
     if (oldPassHash !== user.u_password) {
-      throw AUTHENTICATION_FAILED;
+      return AUTHENTICATION_FAILED;
     }
 
     const saltedNewPass = user.u_salt + newpassword;
@@ -351,7 +358,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: "Password changed successfully",
+      message: PASSWORD_RESET_SUCCESSFULLY,
     });
   } catch (e) {
     if (e === AUTHENTICATION_FAILED) {
@@ -373,7 +380,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
 router.post("/logout", authenticateToken, async (req, res) => {
   res.status(200).send({
     success: true,
-    message: "Logged out",
+    message: LOGGED_OUT,
   });
 });
 
@@ -438,7 +445,7 @@ router.post("/forgot-password", async (req, res) => {
       to: email,
       from: process.env.EMAIL,
       subject: "Password Reset",
-      text: `This is your token its valid for 1 hour: ${token}`,
+      text: `This is your link to reset your password, its valid for 1 hour: http://localhost:3000/user/reset-password-view/${token}`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -481,7 +488,7 @@ router.post("/reset-password/:token", async (req, res) => {
     if (!user) {
       res.status(400).send({
         success: false,
-        error: "Token is invalid or has expired",
+        error: WRONG_CREDENTIAL,
       });
       return;
     }
@@ -502,15 +509,24 @@ router.post("/reset-password/:token", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: "Password has been reset successfully.",
+      message: PASSWORD_RESET_SUCCESSFULLY,
     });
+    res.render("resetPasswordView", { message: PASSWORD_RESET_SUCCESSFULLY });
   } catch (e) {
     console.error(e);
     res.status(500).send({
       success: false,
       error: e,
     });
+    res.render("resetPasswordView", { message: ERROR_OCCURED });
   }
+});
+
+// reset password views
+router.get("/reset-password-view/:token", async (req, res) => {
+  const { token } = req.params;
+  console.log(token);
+  res.render("resetPasswordView", { token: token });
 });
 
 module.exports = router;

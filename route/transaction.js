@@ -8,7 +8,7 @@ const {
   TRANSACTION_NOT_FOUND,
   INVALID_TRANSACTION_TYPE,
   NO_UPDATE,
-} = require("../constants/error_messages");
+} = require("../constants/messages");
 const makeId = require("../utils/random_string");
 
 const router = express.Router();
