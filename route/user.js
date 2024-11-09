@@ -254,14 +254,14 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      throw AUTHENTICATION_FAILED;
+      return AUTHENTICATION_FAILED;
     }
 
     const saltedUsersInputPass = user.u_salt + password;
     const usersInputHashBrown = crypto.SHA256(saltedUsersInputPass).toString();
 
     if (usersInputHashBrown !== user.u_password) {
-      throw AUTHENTICATION_FAILED;
+      return AUTHENTICATION_FAILED;
     }
 
     const payload = {
