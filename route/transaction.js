@@ -73,4 +73,42 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
+// Get All Transactions
+router.get("/", authenticateToken, async (req, res) => {
+  const cred = decoded_access(req.headers["authorization"]);
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_uid: cred.uid,
+        u_is_deleted: false,
+      },
+    });
+    if (!user) {
+      res.status(404).send({
+        success: false,
+        error: "User not found",
+      });
+      return;
+    }
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        t_u_uid: cred.uid,
+        t_is_deleted: false,
+      },
+    });
+
+    transactions.forEach((transaction) => delete transaction.t_id);
+
+    res.status(200).send({
+      success: true,
+      data: transactions,
+    });
+  } catch (err) {
+    res.status(500).send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
 module.exports = router;
