@@ -1,0 +1,76 @@
+/* Centering the container */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif; /* Optional: Set a default font */
+}
+
+.reset-password-container {
+    max-width: 400px;
+    width: 100%; /* Ensures the container is responsive */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset Password Container Styling */
+.reset-password-container h2 {
+    text-align: center;
+}
+
+.reset-password-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.reset-password-container form div {
+    margin-bottom: 15px;
+}
+
+.reset-password-container form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.reset-password-container form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.reset-password-container form button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.reset-password-container form button:hover {
+    background-color: #0056b3;
+}
+
+.reset-password-container p {
+    text-align: center;
+    color: red;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 600px) {
+    .reset-password-container {
+        padding: 10px;
+    }
+
+    .reset-password-container form input,
+    .reset-password-container form button {
+        font-size: 14px;
+        padding: 8px;
+    }
+}

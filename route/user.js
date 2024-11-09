@@ -1,7 +1,11 @@
-const User = require("../model/user");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const express = require("express");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto-js");
+const crypto1 = require("crypto");
+require("dotenv").config();
 
-//utils
-const makeId = require("../utils/random_string");
 const {
   validateInputEmail,
   validateInputPassword,
@@ -13,43 +17,30 @@ const {
   generateAccessToken,
   decoded_access,
 } = require("../utils/jwt");
-require("dotenv").config();
-
-//library
-const express = require("express");
-const crypto = require("crypto-js");
-
-//dao
-const { addUser } = require("../dao/user/add");
-const { getAllUsers } = require("../dao/user/get_all");
-const { editUser } = require("../dao/user/edit");
-const { deleteUser } = require("../dao/user/delete");
-const { loginWithUsername, loginWithEmail } = require("../dao/user/login");
-const { changePwd } = require("../dao/user/changePassword");
-const { forgotPassword } = require("../dao/user/forgotPassword");
-const { resetPassword } = require("../dao/user/resetPassword");
-
+const makeId = require("../utils/random_string");
 const {
   AUTHENTICATION_FAILED,
   INCOMPLETE_BODY,
   EMAIL_NOT_VALID,
-} = require("../constants/error_messages");
+  ERROR_OCCURED,
+  PASSWORD_RESET_SUCCESSFULLY,
+  WRONG_CREDENTIAL,
+  LOGGED_OUT,
+  FULLNAME_NOT_VALID,
+  USERNAME_NOT_VALID,
+  PASSWORD_NOT_VALID,
+  PASSWORD_NOT_MATCH,
+} = require("../constants/messages");
 
 const router = express.Router();
 
-//add User
+// Add User
 router.post("/", async (req, res) => {
   const { fullname, username, email, newpassword, confpassword } = req.body;
-  if (
-    fullname === undefined ||
-    username === undefined ||
-    email === undefined ||
-    newpassword === undefined ||
-    confpassword === undefined
-  ) {
+  if (!fullname || !username || !email || !newpassword || !confpassword) {
     res.status(400).send({
       success: false,
-      error: "Incomplete body",
+      error: INCOMPLETE_BODY,
     });
     return;
   }
@@ -57,7 +48,7 @@ router.post("/", async (req, res) => {
   if (newpassword !== confpassword) {
     res.status(400).send({
       success: false,
-      error: "Password does not match",
+      error: PASSWORD_NOT_MATCH,
     });
     return;
   }
@@ -65,7 +56,7 @@ router.post("/", async (req, res) => {
   if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
-      error: "Fullname can only contain alphabets and spaces",
+      error: FULLNAME_NOT_VALID,
     });
     return;
   }
@@ -73,16 +64,15 @@ router.post("/", async (req, res) => {
   if (!validateInputUsername(username)) {
     res.status(400).send({
       success: false,
-      error: "Username can only contain alphanumeric characters",
+      error: USERNAME_NOT_VALID,
     });
     return;
   }
 
-  if (!validateInputPassword(password)) {
+  if (!validateInputPassword(newpassword)) {
     res.status(400).send({
       success: false,
-      error:
-        "Password must be at least 8 characters long, contain at least one uppercase letter and one special character",
+      error: PASSWORD_NOT_VALID,
     });
     return;
   }
@@ -94,71 +84,73 @@ router.post("/", async (req, res) => {
     });
     return;
   }
-  const password = newpassword;
+
   const salt = makeId(6);
-  const saltPlusPass = salt + password;
-  const saltedPassword = crypto.SHA256(saltPlusPass).toString();
+  const saltedPassword = crypto.SHA256(salt + newpassword).toString();
 
-  const user = new User(
-    null,
-    makeId(8),
-    req.body.fullname,
-    req.body.username,
-    req.body.email,
-    req.body.balance,
-  );
-  user.salt = salt;
-  user.password = saltedPassword;
-  user.is_deleted = 0;
-
-  addUser(user)
-    .then(async (result) => {
-      res.status(200).send({
-        success: true,
-        result: result,
-      });
-    })
-    .catch((e) => {
-      console.error(e);
-      res.status(500).send({
-        success: false,
-        error: e,
-      });
+  try {
+    const user = await prisma.user.create({
+      data: {
+        u_uid: makeId(8),
+        u_fullname: fullname,
+        u_username: username,
+        u_email: email,
+        u_password: saltedPassword,
+        u_salt: salt,
+        u_is_deleted: false,
+        u_balance: 0,
+      },
     });
+
+    res.status(200).send({
+      success: true,
+      result: user,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({
+      success: false,
+      error: e,
+    });
+  }
 });
 
-//get user
+// Get User
 router.get("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
-  getAllUsers(cred.uid)
-    .then((result) => {
-      res.status(200).send({
-        success: true,
-        result: result,
-      });
-    })
-    .catch((e) => {
-      console.error(e);
-      res.status(500).send({
-        success: false,
-        error: e,
-      });
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_uid: cred.uid,
+        u_is_deleted: false,
+      },
     });
+
+    delete user.u_password;
+    delete user.u_salt;
+    delete user.u_id;
+
+    res.status(200).send({
+      success: true,
+      result: user,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({
+      success: false,
+      error: e,
+    });
+  }
 });
 
-//edit user
+// Edit User
 router.put("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
   const { fullname, username, email, balance } = req.body;
-  if (
-    fullname === undefined ||
-    username === undefined ||
-    email === undefined ||
-    balance === undefined
-  ) {
+  if (!fullname || !username || !email || balance === undefined) {
     res.status(400).send({
       success: false,
-      error: "INCOMPLETE_BODY",
+      error: INCOMPLETE_BODY,
     });
     return;
   }
@@ -166,143 +158,149 @@ router.put("/", authenticateToken, async (req, res) => {
   if (!validateInputFullname(fullname)) {
     res.status(400).send({
       success: false,
-      error: "Fullname can only contain alphabets and spaces",
-    });
-  }
-
-  if (validateInputUsername(username)) {
-    res.status(400).send({
-      success: false,
-      error: "Username can only contain alphanumeric characters",
-    });
-  }
-
-  if (validateInputEmail(email)) {
-    res.status(400).send({
-      success: false,
-      error: "Email is not valid",
+      error: FULLNAME_NOT_VALID,
     });
     return;
   }
-  const user = new User(null, cred.uid, fullname, username, email, balance);
-  delete user.id;
 
-  editUser(user)
-    .then((result) => {
-      res.status(200).send({
-        success: true,
-        result: result,
-      });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send({
-        success: false,
-        error: err,
-      });
+  if (!validateInputUsername(username)) {
+    res.status(400).send({
+      success: false,
+      error: USERNAME_NOT_VALID,
     });
+    return;
+  }
+
+  if (!validateInputEmail(email)) {
+    res.status(400).send({
+      success: false,
+      error: EMAIL_NOT_VALID,
+    });
+    return;
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: {
+        u_uid: cred.uid,
+      },
+      data: {
+        u_fullname: fullname,
+        u_username: username,
+        u_email: email,
+        u_balance: parseFloat(balance),
+      },
+    });
+
+    delete user.u_password;
+    delete user.u_salt;
+    delete user.u_id;
+
+    res.status(200).send({
+      success: true,
+      result: user,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      success: false,
+      error: err,
+    });
+  }
 });
 
-//delete user
+// Delete User
 router.delete("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
-  deleteUser(cred.uid)
-    .then((result) => {
-      res.status(200).send({
-        success: true,
-        result: result,
+  try {
+    await prisma.user.update({
+      where: {
+        u_uid: cred.uid,
+      },
+      data: {
+        u_is_deleted: true,
+      },
+    });
+
+    res.status(200).send({
+      success: true,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({
+      success: false,
+      error: e,
+    });
+  }
+});
+
+// Login
+router.post("/login", async (req, res) => {
+  const { emailorusername, password } = req.body;
+  if (!emailorusername || !password) {
+    res.status(400).send({
+      success: false,
+      error: INCOMPLETE_BODY,
+    });
+    return;
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ u_email: emailorusername }, { u_username: emailorusername }],
+        u_is_deleted: false,
+      },
+    });
+
+    if (!user) {
+      throw AUTHENTICATION_FAILED;
+    }
+
+    const saltedUsersInputPass = user.u_salt + password;
+    const usersInputHashBrown = crypto.SHA256(saltedUsersInputPass).toString();
+
+    if (usersInputHashBrown !== user.u_password) {
+      throw AUTHENTICATION_FAILED;
+    }
+
+    const payload = {
+      uid: user.u_uid,
+      email: user.u_email,
+      fullname: user.u_fullname,
+      username: user.u_username,
+    };
+
+    delete user.u_password;
+    delete user.u_salt;
+    delete user.u_id;
+
+    res.status(200).send({
+      success: true,
+      users: user,
+      token: generateAccessToken(payload),
+    });
+  } catch (e) {
+    if (e === AUTHENTICATION_FAILED) {
+      res.status(401).send({
+        success: false,
+        error: AUTHENTICATION_FAILED,
       });
-    })
-    .catch((e) => {
+    } else {
       console.error(e);
       res.status(500).send({
         success: false,
         error: e,
       });
-    });
-});
-
-//login
-router.post("/login", async (req, res) => {
-  const { emailorusername, password } = req.body;
-  if (emailorusername === undefined || password === undefined) {
-    res.status(400).send({
-      success: false,
-      error: INCOMPLETE_BODY,
-    });
-  }
-  if (validateInputEmail(emailorusername)) {
-    loginWithEmail(emailorusername, password)
-      .then((result) => {
-        const payload = {
-          uid: result.uid,
-          email: result.email,
-          fullname: result.fullname,
-          username: result.username,
-        };
-
-        res.status(200).send({
-          success: true,
-          users: result,
-          token: generateAccessToken(payload),
-        });
-      })
-      .catch((e) => {
-        if (e === AUTHENTICATION_FAILED) {
-          res.status(401).send({
-            success: false,
-            error: AUTHENTICATION_FAILED,
-          });
-        } else {
-          console.error(e);
-          res.status(500).send({
-            success: false,
-            error: e,
-          });
-        }
-      });
-  } else {
-    loginWithUsername(emailorusername, password)
-      .then((result) => {
-        const payload = {
-          uid: result.uid,
-          email: result.email,
-          fullname: result.fullname,
-          username: result.username,
-        };
-
-        res.status(200).send({
-          success: true,
-          users: result,
-          token: generateAccessToken(payload),
-        });
-      })
-      .catch((e) => {
-        if (e === AUTHENTICATION_FAILED) {
-          res.status(401).send({
-            success: false,
-            error: AUTHENTICATION_FAILED,
-          });
-        } else {
-          console.error(e);
-          res.status(500).send({
-            success: false,
-            error: e,
-          });
-        }
-      });
+    }
   }
 });
 
-//change password
+// Change Password
 router.put("/changepassword", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
   const { oldpassword, newpassword, confpassword } = req.body;
-  if (
-    oldpassword === undefined ||
-    newpassword === undefined ||
-    confpassword === undefined
-  ) {
+  if (!oldpassword || !newpassword || !confpassword) {
     res.status(400).send({
       success: false,
       error: "INCOMPLETE_BODY",
@@ -327,42 +325,70 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     return;
   }
 
-  changePwd(cred.uid, oldpassword, newpassword)
-    .then((result) => {
-      res.status(200).send({
-        success: true,
-        result: result,
-      });
-    })
-    .catch((e) => {
-      if (e === AUTHENTICATION_FAILED) {
-        res.status(401).send({
-          success: false,
-          error: AUTHENTICATION_FAILED,
-        });
-      } else {
-        console.error(e);
-        res.status(500).send({
-          success: false,
-          error: e,
-        });
-      }
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_uid: cred.uid,
+        u_is_deleted: false,
+      },
     });
+
+    if (!user) {
+      return AUTHENTICATION_FAILED;
+    }
+
+    const saltedOldPass = user.u_salt + oldpassword;
+    const oldPassHash = crypto.SHA256(saltedOldPass).toString();
+
+    if (oldPassHash !== user.u_password) {
+      return AUTHENTICATION_FAILED;
+    }
+
+    const saltedNewPass = user.u_salt + newpassword;
+    const newPassHash = crypto.SHA256(saltedNewPass).toString();
+
+    await prisma.user.update({
+      where: {
+        u_uid: cred.uid,
+      },
+      data: {
+        u_password: newPassHash,
+      },
+    });
+
+    res.status(200).send({
+      success: true,
+      message: PASSWORD_RESET_SUCCESSFULLY,
+    });
+  } catch (e) {
+    if (e === AUTHENTICATION_FAILED) {
+      res.status(401).send({
+        success: false,
+        error: AUTHENTICATION_FAILED,
+      });
+    } else {
+      console.error(e);
+      res.status(500).send({
+        success: false,
+        error: e,
+      });
+    }
+  }
 });
 
-//logout
+// Logout
 router.post("/logout", authenticateToken, async (req, res) => {
   res.status(200).send({
     success: true,
-    message: "Logged out",
+    message: LOGGED_OUT,
   });
 });
 
-//forgot password
+// Forgot Password
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
-  if (email === undefined) {
+  if (!email) {
     res.status(400).send({
       success: false,
       error: INCOMPLETE_BODY,
@@ -377,40 +403,130 @@ router.post("/forgot-password", async (req, res) => {
     });
     return;
   }
-  forgotPassword(email)
-    .then((message) => {
-      res.status(200).send({
-        success: true,
-        message: message,
-      });
-    })
-    .catch((e) => {
-      console.error(e);
-      res.status(500).send({
-        success: false,
-        error: e,
-      });
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_email: email,
+      },
     });
+
+    if (!user) {
+      res.status(404).send({
+        success: false,
+        error: EMAIL_NOT_VALID,
+      });
+      return;
+    }
+
+    const token = crypto1.randomBytes(20).toString("hex");
+    const expiryTime = new Date(Date.now() + 3600000);
+
+    await prisma.user.update({
+      where: {
+        u_email: email,
+      },
+      data: {
+        u_resetPasswordToken: token,
+        u_resetPasswordExpires: expiryTime,
+      },
+    });
+
+    // Send reset password email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      to: email,
+      from: process.env.EMAIL,
+      subject: "Password Reset",
+      text: `This is your link to reset your password, its valid for 1 hour: http://localhost:3000/user/reset-password-view/${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).send({
+      success: true,
+      message: "Password reset link sent to your email.",
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({
+      success: false,
+      error: e,
+    });
+  }
 });
 
-router.post("/reset-password/:token", (req, res) => {
+// Reset Password
+router.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { newpassword } = req.body;
 
-  if (newpassword === undefined) {
+  if (!newpassword) {
     res.status(400).send({
       success: false,
       error: INCOMPLETE_BODY,
     });
+    return;
   }
 
-  resetPassword(token, newpassword)
-    .then((message) => {
-      res.status(200).send(message);
-    })
-    .catch((error) => {
-      res.status(400).send(error);
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        u_resetPasswordToken: token,
+        u_resetPasswordExpires: {
+          gte: new Date(),
+        },
+      },
     });
+
+    if (!user) {
+      res.status(400).send({
+        success: false,
+        error: WRONG_CREDENTIAL,
+      });
+      return;
+    }
+
+    const saltedNewPass = user.u_salt + newpassword;
+    const newPassHash = crypto.SHA256(saltedNewPass).toString();
+
+    await prisma.user.update({
+      where: {
+        u_uid: user.u_uid,
+      },
+      data: {
+        u_password: newPassHash,
+        u_resetPasswordToken: null,
+        u_resetPasswordExpires: null,
+      },
+    });
+
+    res.status(200).send({
+      success: true,
+      message: PASSWORD_RESET_SUCCESSFULLY,
+    });
+    res.render("resetPasswordView", { message: PASSWORD_RESET_SUCCESSFULLY });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({
+      success: false,
+      error: e,
+    });
+    res.render("resetPasswordView", { message: ERROR_OCCURED });
+  }
+});
+
+// reset password views
+router.get("/reset-password-view/:token", async (req, res) => {
+  const { token } = req.params;
+  console.log(token);
+  res.render("resetPasswordView", { token: token });
 });
 
 module.exports = router;
