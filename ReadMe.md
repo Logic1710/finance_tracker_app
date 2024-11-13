@@ -85,10 +85,10 @@ Finance Tracker App is a web application that helps users manage their finances 
 ### Transaction Routes
 
 - POST `/transaction` - Add a new transaction
-   - **Body**: `{ "name": "string", "type": "string", "category": "string", "amount": "number" }`
+   - **Body**: `{ "name": "string", "type": "string", "category": "string", "amount": "number", "date": "string" }`
    - **Authorization**: Bearer token
 - PUT `/transaction?q=<Transaction UID>` - Update a transaction
-   - **Body**: `{ "name": "string", "type": "string", "category": "string", "amount": "number" }`
+   - **Body**: `{ "name": "string", "type": "string", "category": "string", "amount": "number", "date": "string" }`
    - **Authorization**: Bearer token
 - DELETE `/transaction?q=<Transaction UID>` - Delete a transaction
    - **Authorization**: Bearer token
