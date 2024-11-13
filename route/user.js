@@ -254,14 +254,14 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return AUTHENTICATION_FAILED;
+      throw AUTHENTICATION_FAILED;
     }
 
     const saltedUsersInputPass = user.u_salt + password;
     const usersInputHashBrown = crypto.SHA256(saltedUsersInputPass).toString();
 
     if (usersInputHashBrown !== user.u_password) {
-      return AUTHENTICATION_FAILED;
+      throw AUTHENTICATION_FAILED;
     }
 
     const payload = {
@@ -334,14 +334,14 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
     });
 
     if (!user) {
-      return AUTHENTICATION_FAILED;
+      throw AUTHENTICATION_FAILED;
     }
 
     const saltedOldPass = user.u_salt + oldpassword;
     const oldPassHash = crypto.SHA256(saltedOldPass).toString();
 
     if (oldPassHash !== user.u_password) {
-      return AUTHENTICATION_FAILED;
+      throw AUTHENTICATION_FAILED;
     }
 
     const saltedNewPass = user.u_salt + newpassword;
