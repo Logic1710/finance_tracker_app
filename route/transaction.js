@@ -43,7 +43,7 @@ router.post("/", authenticateToken, async (req, res) => {
     } else if (type === "expense") {
       user.u_balance -= parseFloat(amount);
     } else {
-      return new Error(INVALID_TRANSACTION_TYPE);
+      throw Error(INVALID_TRANSACTION_TYPE);
     }
 
     await prisma.user.update({
@@ -165,7 +165,7 @@ router.put("/", authenticateToken, async (req, res) => {
     } else if (type === "expense") {
       user.u_balance -= parseFloat(amount);
     } else {
-      return new Error(INVALID_TRANSACTION_TYPE);
+      throw Error(INVALID_TRANSACTION_TYPE);
     }
 
     if (
@@ -254,7 +254,7 @@ router.delete("/", authenticateToken, async (req, res) => {
     } else if (transaction.t_type === "expense") {
       user.u_balance += parseFloat(transaction.t_amount);
     } else {
-      return new Error(INVALID_TRANSACTION_TYPE);
+      throw Error(INVALID_TRANSACTION_TYPE);
     }
 
     await prisma.user.update({

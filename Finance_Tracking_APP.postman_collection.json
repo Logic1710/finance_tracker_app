@@ -1,0 +1,537 @@
+{
+	"info": {
+		"_postman_id": "5c46ac5f-ae82-49d0-9484-5dd8dd39904f",
+		"name": "Finance_Tracking_APP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21035318"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Add User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "fullname",
+									"value": "Hendika Indrawan Lukman",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "Hanzier",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "Hendika@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "newpassword",
+									"value": "Hendika@SGU123",
+									"type": "text"
+								},
+								{
+									"key": "confpassword",
+									"value": "Hendika@SGU123",
+									"type": "text"
+								},
+								{
+									"key": "balance",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "emailorusername",
+									"value": "humblegod17",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Dylan@171003",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "jwt",
+							"jwt": [
+								{
+									"key": "header",
+									"value": "{}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "algorithm",
+									"value": "HS256",
+									"type": "string"
+								},
+								{
+									"key": "isSecretBase64Encoded",
+									"value": false,
+									"type": "boolean"
+								},
+								{
+									"key": "payload",
+									"value": "{}",
+									"type": "string"
+								},
+								{
+									"key": "headerPrefix",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "queryParamKey",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "oldpassword",
+									"value": "Dylan@1710",
+									"type": "text"
+								},
+								{
+									"key": "newpassword",
+									"value": "Dylan@171003",
+									"type": "text"
+								},
+								{
+									"key": "confpassword",
+									"value": "Dylan@171003",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user/changepassword",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"changepassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "humblegod17",
+									"type": "text"
+								},
+								{
+									"key": "fullname",
+									"value": "Dylan Tirta Kurniawan",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "dylantirta17@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "balance",
+									"value": "1000000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/user/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "newpassword",
+									"value": "Dylan@171003",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user/reset-password/d03c1f14e6d42d16b35532effc8c0577966cfb16",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"reset-password",
+								"d03c1f14e6d42d16b35532effc8c0577966cfb16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "dylantirta17@gmail.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/user/forgot-password",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transaction",
+			"item": [
+				{
+					"name": "Add Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Makan",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "expense",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "personal",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "200000",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "2024-11-13",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/transaction",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Transaction",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Fund Transfer",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "income",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "personal",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "200000",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "2024-11-13",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/transaction?q=HpVbGk3s2x",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"transaction"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "HpVbGk3s2x"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Transaction",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJ2aFpiWVdUVyIsImVtYWlsIjoiZHlsYW50aXJ0YTE3QGdtYWlsLmNvbSIsImZ1bGxuYW1lIjoiRHlsYW4gVGlydGEgS3Vybmlhd2FuIiwidXNlcm5hbWUiOiJodW1ibGVnb2QxNyIsImlhdCI6MTczMTQ4NDA3MCwiZXhwIjoxNzMxNTA1NjcwfQ.xgFq5wIJ29N0o38hackaPPZF9ZaCfhuoNKTqrn8p9po",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/transaction?q=SDX5rx2iJa",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"transaction"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "SDX5rx2iJa"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
