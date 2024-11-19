@@ -17,12 +17,12 @@ model User {
   u_id       Int      @id @default(autoincrement())
   u_uid      String   @unique
   u_fullname String
-  u_username String   @unique
+  u_username String?   @unique
   u_email    String   @unique
   u_google_id String? @unique
   u_balance  Float
   u_salt     String
-  u_password String
+  u_password String?
   u_resetPasswordToken String?
   u_resetPasswordExpires DateTime?
   u_created_at  DateTime @default(now())

@@ -2,6 +2,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
+const makeId = require("./random_string");
 const prisma = new PrismaClient();
 
 passport.use(
@@ -28,10 +29,11 @@ passport.use(
           // Create a new user record
           user = await prisma.user.create({
             data: {
-              u_uid: profile.id,
+              u_uid: makeId(8),
               u_fullname: profile.displayName,
               u_email: profile.emails[0].value,
               u_google_id: profile.id,
+              u_salt: makeId(6),
               u_is_deleted: false,
               u_balance: 0,
             },
