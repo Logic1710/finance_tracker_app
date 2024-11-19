@@ -20,6 +20,21 @@ app.use(express.static(path.join(__dirname, "public")));
 const port = 3000;
 app.listen(port, () => console.log("Server is running on port " + port));
 
+//log
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.url}`);
+    console.log(`Headers: ${JSON.stringify(req.headers)}`);
+    console.log(`Body: ${JSON.stringify(req.body)}`);
+    console.log(`Status: ${res.statusCode}`);
+    console.log(`Response Time: ${duration}ms`);
+    console.log(`Client IP: ${req.ip}`);
+  });
+  next();
+});
+
 // routes
 app.use(
   cors({
