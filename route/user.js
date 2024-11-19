@@ -18,6 +18,8 @@ const {
   decoded_access,
 } = require("../utils/jwt");
 const makeId = require("../utils/random_string");
+const passport = require("../utils/oAuth");
+
 const {
   AUTHENTICATION_FAILED,
   INCOMPLETE_BODY,
@@ -266,9 +268,6 @@ router.post("/login", async (req, res) => {
 
     const payload = {
       uid: user.u_uid,
-      email: user.u_email,
-      fullname: user.u_fullname,
-      username: user.u_username,
     };
 
     delete user.u_password;
@@ -378,6 +377,7 @@ router.put("/changepassword", authenticateToken, async (req, res) => {
 
 // Logout
 router.post("/logout", authenticateToken, async (req, res) => {
+  req.logout();
   res.status(200).send({
     success: true,
     message: LOGGED_OUT,
@@ -528,5 +528,25 @@ router.get("/reset-password-view/:token", async (req, res) => {
   console.log(token);
   res.render("resetPasswordView", { token: token });
 });
+
+//login with Google
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/" }),
+  (req, res) => {
+    // Send token and user info in JSON format
+    res.status(200).json({
+      success: true,
+      message: "Authentication successful",
+      token: req.user.token,
+      user: req.user.user,
+    });
+  },
+);
 
 module.exports = router;

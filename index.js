@@ -1,6 +1,8 @@
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
+const session = require("express-session");
+const passport = require("./utils/oAuth");
 
 // import all routes
 const userRouter = require("./route/user");
@@ -26,7 +28,6 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     console.log(`${req.method} ${req.url}`);
-    console.log(`Headers: ${JSON.stringify(req.headers)}`);
     console.log(`Body: ${JSON.stringify(req.body)}`);
     console.log(`Status: ${res.statusCode}`);
     console.log(`Response Time: ${duration}ms`);
@@ -34,6 +35,17 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+//session
+app.use(
+  session({
+    secret: process.env.TOKEN_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // routes
 app.use(

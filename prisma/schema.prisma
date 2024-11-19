@@ -19,6 +19,7 @@ model User {
   u_fullname String
   u_username String   @unique
   u_email    String   @unique
+  u_google_id String? @unique
   u_balance  Float
   u_salt     String
   u_password String
