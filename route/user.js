@@ -38,8 +38,16 @@ const router = express.Router();
 
 // Add User
 router.post("/", async (req, res) => {
-  const { fullname, username, email, newpassword, confpassword } = req.body;
-  if (!fullname || !username || !email || !newpassword || !confpassword) {
+  const { fullname, username, email, balance, newpassword, confpassword } =
+    req.body;
+  if (
+    !fullname ||
+    !username ||
+    !email ||
+    !balance ||
+    !newpassword ||
+    !confpassword
+  ) {
     res.status(400).send({
       success: false,
       error: INCOMPLETE_BODY,
@@ -100,7 +108,7 @@ router.post("/", async (req, res) => {
         u_password: saltedPassword,
         u_salt: salt,
         u_is_deleted: false,
-        u_balance: 0,
+        u_balance: balance,
       },
     });
 
