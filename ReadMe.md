@@ -81,6 +81,9 @@ Finance Tracker App is a web application that helps users manage their finances 
 - POST `/user/forgot-password` - Request password reset link
    - **Body**: `{ "email": "string" }`
    - **Authorization**: None
+- GET `/user/google` - Google OAuth
+   - **Authorization**: None
+   - **NOTE**: still in development and using localhost:3000 in the cors in google console
 
 ### Transaction Routes
 
