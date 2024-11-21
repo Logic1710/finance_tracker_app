@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 const makeId = require("./random_string");
 const prisma = new PrismaClient();
+require("dotenv").config();
 
 passport.use(
   new GoogleStrategy(

@@ -108,7 +108,7 @@ router.post("/", async (req, res) => {
         u_password: saltedPassword,
         u_salt: salt,
         u_is_deleted: false,
-        u_balance: balance,
+        u_balance: parseFloat(balance),
       },
     });
 
