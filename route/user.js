@@ -453,7 +453,7 @@ router.post("/forgot-password", async (req, res) => {
       to: email,
       from: process.env.EMAIL,
       subject: "Password Reset",
-      text: `This is your link to reset your password, its valid for 1 hour: http://localhost:3000/user/reset-password-view/${token}`,
+      text: `This is your link to reset your password, its valid for 1 hour: https://api-service-743940785467.us-central1.run.app/user/reset-password-view/${token}`,
     };
 
     await transporter.sendMail(mailOptions);

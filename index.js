@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const port = 3000;
+const port = process.env.PORT || 8080;
 app.listen(port, () => console.log("Server is running on port " + port));
 
 //log
@@ -27,11 +27,17 @@ app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
     const duration = Date.now() - start;
-    console.log(`${req.method} ${req.url}`);
-    console.log(`Body: ${JSON.stringify(req.body)}`);
-    console.log(`Status: ${res.statusCode}`);
-    console.log(`Response Time: ${duration}ms`);
-    console.log(`Client IP: ${req.ip}`);
+    console.log(
+      `${req.method} ${req.url}` +
+        "\n" +
+        `Body: ${JSON.stringify(req.body)}` +
+        "\n" +
+        `Status: ${res.statusCode}` +
+        "\n" +
+        `Response Time: ${duration}ms` +
+        "\n" +
+        `Client IP: ${req.ip}`,
+    );
   });
   next();
 });
