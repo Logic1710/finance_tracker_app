@@ -8,6 +8,7 @@ const {
   TRANSACTION_NOT_FOUND,
   INVALID_TRANSACTION_TYPE,
   NO_UPDATE,
+  INSUFFICIENT_BALANCE,
 } = require("../constants/messages");
 const makeId = require("../utils/random_string");
 
@@ -42,6 +43,13 @@ router.post("/", authenticateToken, async (req, res) => {
       user.u_balance += parseFloat(amount);
     } else if (type === "expense") {
       user.u_balance -= parseFloat(amount);
+      if (user.u_balance < 0) {
+        res.status(400).send({
+          success: false,
+          error: INSUFFICIENT_BALANCE,
+        });
+        return;
+      }
     } else {
       throw Error(INVALID_TRANSACTION_TYPE);
     }
@@ -165,6 +173,13 @@ router.put("/", authenticateToken, async (req, res) => {
       user.u_balance += parseFloat(amount);
     } else if (type === "expense") {
       user.u_balance -= parseFloat(amount);
+      if (user.u_balance < 0) {
+        res.status(400).send({
+          success: false,
+          error: INSUFFICIENT_BALANCE,
+        });
+        return;
+      }
     } else {
       throw Error(INVALID_TRANSACTION_TYPE);
     }
