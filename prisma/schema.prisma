@@ -39,6 +39,7 @@ model Transaction {
   t_type      String
   t_category  String
   t_amount    Float
+  t_description String?
   t_date      String
   t_created_at  DateTime @default(now())
   t_updated_at  DateTime @default(now()) @updatedAt

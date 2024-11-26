@@ -15,7 +15,7 @@ const router = express.Router();
 
 // Add Transaction
 router.post("/", authenticateToken, async (req, res) => {
-  const { name, type, category, amount, date } = req.body;
+  const { name, type, category, amount, description, date } = req.body;
   const cred = decoded_access(req.headers["authorization"]);
   if (!name || !type || !category || !amount || !date) {
     res.status(400).send({
@@ -62,6 +62,7 @@ router.post("/", authenticateToken, async (req, res) => {
         t_name: name,
         t_type: type,
         t_category: category,
+        t_description: description,
         t_amount: parseFloat(amount),
         t_date: date,
         t_is_deleted: false,
@@ -120,7 +121,7 @@ router.get("/", authenticateToken, async (req, res) => {
 
 // edit transaction
 router.put("/", authenticateToken, async (req, res) => {
-  const { name, type, category, amount, date } = req.body;
+  const { name, type, category, amount, description, date } = req.body;
   const { q } = req.query;
   const cred = decoded_access(req.headers["authorization"]);
   if (!name || !type || !category || !amount || !date) {
@@ -173,7 +174,8 @@ router.put("/", authenticateToken, async (req, res) => {
       transaction.t_type === type &&
       transaction.t_category === category &&
       transaction.t_amount === parseFloat(amount) &&
-      transaction.t_date === date
+      transaction.t_date === date &&
+      transaction.t_description === description
     ) {
       return res.status(200).send({
         success: true,
@@ -199,6 +201,7 @@ router.put("/", authenticateToken, async (req, res) => {
         t_type: type,
         t_category: category,
         t_amount: parseFloat(amount),
+        t_description: description,
         t_date: date,
       },
     });
