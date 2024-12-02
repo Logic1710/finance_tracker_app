@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,35 +8,37 @@ datasource db {
 }
 
 model User {
-  u_id       Int      @id @default(autoincrement())
-  u_uid      String   @unique
-  u_fullname String
-  u_username String?   @unique
-  u_email    String   @unique
-  u_google_id String? @unique
-  u_balance  Float
-  u_salt     String
-  u_password String?
-  u_resetPasswordToken String?
+  u_id                   Int           @id @default(autoincrement())
+  u_uid                  String        @unique
+  u_fullname             String
+  u_username             String?       @unique
+  u_email                String        @unique
+  u_balance              Float
+  u_salt                 String
+  u_password             String?
+  u_resetPasswordToken   String?
   u_resetPasswordExpires DateTime?
-  u_created_at  DateTime @default(now())
-  u_updated_at  DateTime @default(now()) @updatedAt
-  u_is_deleted Boolean
-  transactions Transaction[]  @relation("UserTransactions")
+  u_created_at           DateTime      @default(now())
+  u_updated_at           DateTime      @default(now()) @updatedAt
+  u_is_deleted           Boolean
+  u_google_id            String?       @unique
+  transactions           Transaction[] @relation("UserTransactions")
 }
 
 model Transaction {
-  t_id        Int      @id @default(autoincrement())
-  t_uid       String   @unique
-  t_u_uid     String
-  t_name      String
-  t_type      String
-  t_category  String
-  t_amount    Float
-  t_description String?
-  t_date      String
+  t_id          Int      @id @default(autoincrement())
+  t_uid         String   @unique
+  t_u_uid       String
+  t_name        String
+  t_type        String
+  t_category    String
+  t_amount      Float
   t_created_at  DateTime @default(now())
   t_updated_at  DateTime @default(now()) @updatedAt
-  t_is_deleted Boolean
-  user         User      @relation("UserTransactions", fields: [t_u_uid], references: [u_uid])
+  t_is_deleted  Boolean
+  t_date        String
+  t_description String?
+  user          User     @relation("UserTransactions", fields: [t_u_uid], references: [u_uid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([t_u_uid], map: "Transaction_t_u_uid_fkey")
 }
