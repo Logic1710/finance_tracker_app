@@ -94,7 +94,7 @@ router.get("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
 
   // Extract optional query parameters
-  const { date, category, month } = req.query;
+  const { category, month, uid } = req.query;
 
   try {
     const user = await prisma.user.findFirst({
@@ -115,6 +115,10 @@ router.get("/", authenticateToken, async (req, res) => {
       t_u_uid: cred.uid,
       t_is_deleted: false,
     };
+
+    if (uid) {
+      transactionFilters.t_uid = uid;
+    }
 
     if (month) {
       const [year, monthNum] = month.split("-");

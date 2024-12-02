@@ -25,6 +25,23 @@ app.listen(port, () => console.log("Server is running on port " + port));
 //log
 app.use((req, res, next) => {
   const start = Date.now();
+  let responseBody = "";
+
+  // Create a custom writable stream to capture the response body
+  const originalWrite = res.write;
+  const originalEnd = res.end;
+
+  res.write = function (chunk, ...args) {
+    responseBody += chunk.toString(); // Capture the chunk
+    originalWrite.apply(res, [chunk, ...args]); // Call the original `res.write`
+  };
+
+  res.end = function (chunk, ...args) {
+    if (chunk) {
+      responseBody += chunk.toString(); // Capture the final chunk
+    }
+    originalEnd.apply(res, [chunk, ...args]); // Call the original `res.end`
+  };
   res.on("finish", () => {
     const duration = Date.now() - start;
     console.log(
@@ -32,11 +49,12 @@ app.use((req, res, next) => {
         "\n" +
         `Body: ${JSON.stringify(req.body)}` +
         "\n" +
-        `Status: ${res.statusCode}` +
+        `Status: ${res.statusCode} ${res.statusMessage}\`` +
         "\n" +
         `Response Time: ${duration}ms` +
         "\n" +
         `Client IP: ${req.ip}`,
+      "\n" + `Response Body: ${responseBody}`,
     );
   });
   next();
