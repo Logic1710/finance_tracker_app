@@ -49,7 +49,7 @@ app.use((req, res, next) => {
         "\n" +
         `Body: ${JSON.stringify(req.body)}` +
         "\n" +
-        `Status: ${res.statusCode} ${res.statusMessage}\`` +
+        `Status: ${res.statusCode} ${res.statusMessage}` +
         "\n" +
         `Response Time: ${duration}ms` +
         "\n" +
