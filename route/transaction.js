@@ -92,6 +92,10 @@ router.post("/", authenticateToken, async (req, res) => {
 // Get All Transactions
 router.get("/", authenticateToken, async (req, res) => {
   const cred = decoded_access(req.headers["authorization"]);
+
+  // Extract optional query parameters
+  const { date, category, month } = req.query;
+
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -106,11 +110,33 @@ router.get("/", authenticateToken, async (req, res) => {
       });
       return;
     }
+
+    const transactionFilters = {
+      t_u_uid: cred.uid,
+      t_is_deleted: false,
+    };
+
+    if (month) {
+      const [year, monthNum] = month.split("-");
+      if (!year || !monthNum) {
+        return res.status(400).send({
+          success: false,
+          error: "Invalid month format. Use YYYY-MM.",
+        });
+      }
+
+      transactionFilters.t_date = {
+        gte: `${year}-${monthNum}-01`,
+        lt: `${year}-${Number(monthNum) + 1}-01`,
+      };
+    }
+
+    if (category) {
+      transactionFilters.t_category = category;
+    }
+
     const transactions = await prisma.transaction.findMany({
-      where: {
-        t_u_uid: cred.uid,
-        t_is_deleted: false,
-      },
+      where: transactionFilters,
     });
 
     transactions.forEach((transaction) => delete transaction.t_id);
