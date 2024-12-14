@@ -1,0 +1,78 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '--no-cache'
+      - '-t'
+      - >-
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - .
+      - '-f'
+      - Dockerfile
+    id: Build
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    args:
+      - '-c'
+      - >
+        mkdir -p prisma/certs &&
+
+        gcloud secrets versions access latest --secret=client-cert >
+        prisma/certs/client-cert.pem &&
+
+        gcloud secrets versions access latest --secret=client-key >
+        prisma/certs/client-key.pem &&
+
+        gcloud secrets versions access latest --secret=server-ca >
+        prisma/certs/server-ca.pem &&
+
+        chmod 644 prisma/certs/*.pem &&
+
+        ls -l &&
+
+        ls -l prisma &&
+
+        ls -l prisma/certs &&
+
+        echo "Client Cert:" && cat prisma/certs/client-cert.pem &&
+
+        echo "Server CA:" && cat prisma/certs/server-ca.pem &&
+
+        echo "Client Key:" && cat prisma/certs/client-key.pem
+    entrypoint: /bin/sh
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >-
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - '--platform=managed'
+      - >-
+        --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - >-
+    $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _DEPLOY_REGION: asia-southeast2
+  _AR_HOSTNAME: asia-southeast2-docker.pkg.dev
+  _PLATFORM: managed
+  _TRIGGER_ID: feffb56e-d68b-437f-9c06-1ee648201f19
+  _SERVICE_NAME: finance-tracking-app-api-service
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - finance-tracking-app-api-service
