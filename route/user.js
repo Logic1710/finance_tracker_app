@@ -547,8 +547,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/",
-    successRedirect: "/",
+    failureRedirect: "/user/google",
   }),
   (req, res) => {
     const token = req.user.token;
