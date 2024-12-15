@@ -545,8 +545,15 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/" }),
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/",
+    successRedirect: "/",
+  }),
   (req, res) => {
+    const token = req.user.token;
+    const redirectURL = `myapp://auth?token=${token}`;
+    res.redirect(redirectURL);
     // Send token and user info in JSON format
     res.status(200).json({
       success: true,
