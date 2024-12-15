@@ -554,8 +554,7 @@ router.get(
     const token = req.user.token;
     const redirectURL = `myapp://auth?token=${token}`;
     res.redirect(redirectURL);
-    // Send token and user info in JSON format
-    res.status(200).json({
+    res.status(200).send({
       success: true,
       message: "Authentication successful",
       token: req.user.token,
