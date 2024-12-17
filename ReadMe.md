@@ -5,8 +5,10 @@ Finance Tracker App is a web application that helps users manage their finances 
 
 ## Features
 - User authentication
-- Transaction management (add, update, delete)
+- Transaction management (add, read, update, delete)
 - Error handling
+- Google Authentication
+- Password reset using email
 
 ## Technologies Used
 - Node.js
@@ -15,6 +17,8 @@ Finance Tracker App is a web application that helps users manage their finances 
 - MySQL
 - JavaScript
 - npm
+- passport (OAuth)
+- NodeMailer (Email)
 
 ## Installation
 
@@ -32,6 +36,7 @@ Finance Tracker App is a web application that helps users manage their finances 
     DATABASE_URL="mysql://<username>:<password>@localhost:3306/<database-name>?schema=public"
     TOKEN_SECRET=45BgR
     ```
+   ###### Note: The OAuth and Reset password function will  not work due to its credentials is personal and not shared.
 4. Initialize Prisma:
     ```sh
     npx prisma init
@@ -51,7 +56,7 @@ Finance Tracker App is a web application that helps users manage their finances 
     ```sh
     npm start
     ```
-2. The server will start on `http://localhost:3000`.
+2. The server will start on `http://localhost:8080`.
 
 ## API Endpoints
 
